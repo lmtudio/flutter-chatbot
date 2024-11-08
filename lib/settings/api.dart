@@ -23,13 +23,12 @@ import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
-final apisProvider =
-    NotifierProvider<ApisNotifier, Map<String, ApiConfig>>(ApisNotifier.new);
+final apisProvider = NotifierProvider<ApisNotifier, bool>(ApisNotifier.new);
 
-class ApisNotifier extends Notifier<Map<String, ApiConfig>> {
+class ApisNotifier extends Notifier<bool> {
   @override
-  Map<String, ApiConfig> build() {
-    return Config.apis;
+  bool build() {
+    return true;
   }
 
   void notify() {
@@ -59,7 +58,7 @@ class _APIWidgetState extends State<APIWidget> {
             if (changed ?? false) await Config.save();
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 8),
         Expanded(
           child: Consumer(builder: (context, ref, child) {
             ref.watch(apisProvider);
@@ -69,6 +68,7 @@ class _APIWidgetState extends State<APIWidget> {
               itemCount: apis.length,
               itemBuilder: (context, index) {
                 return Card.filled(
+                  margin: const EdgeInsets.only(top: 8, bottom: 8),
                   child: ListTile(
                     title: Text(
                       apis[index].key,
@@ -92,6 +92,7 @@ class _APIWidgetState extends State<APIWidget> {
             );
           }),
         ),
+        const SizedBox(height: 8),
       ],
     );
   }

@@ -54,7 +54,17 @@ class _ChatPageState extends State<ChatPage> {
       context: context,
       builder: (BuildContext context) {
         return Wrap(
+          alignment: WrapAlignment.center,
           children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(top: 16, bottom: 8),
+              decoration: const BoxDecoration(
+                color: Colors.grey,
+                borderRadius: BorderRadius.all(Radius.circular(2)),
+              ),
+            ),
             ListTile(
               leading: const Icon(Icons.camera),
               title: Text(S.of(context).camera),
@@ -159,16 +169,25 @@ class _ChatPageState extends State<ChatPage> {
 
     final message = Current.messages[index];
     final children = [
+      Container(
+        width: 40,
+        height: 4,
+        margin: const EdgeInsets.only(top: 16, bottom: 8),
+        decoration: const BoxDecoration(
+          color: Colors.grey,
+          borderRadius: BorderRadius.all(Radius.circular(2)),
+        ),
+      ),
       ListTile(
         title: Text(S.of(context).copy),
         leading: const Icon(Icons.copy_all),
         onTap: () => Navigator.pop(context, MessageEvent.copy),
       ),
-      // ListTile(
-      //   title: Text(S.of(context).source),
-      //   leading: const Icon(Icons.code_outlined),
-      //   onTap: () => Navigator.pop(context, MessageEvent.source),
-      // ),
+      ListTile(
+        title: Text(S.of(context).source),
+        leading: const Icon(Icons.code_outlined),
+        onTap: () => Navigator.pop(context, MessageEvent.source),
+      ),
       // ListTile(
       //   title: Text(S.of(context).edit),
       //   leading: const Icon(Icons.edit_outlined),
@@ -189,7 +208,10 @@ class _ChatPageState extends State<ChatPage> {
     final event = await showModalBottomSheet<MessageEvent>(
       context: context,
       builder: (BuildContext context) {
-        return Wrap(children: children);
+        return Wrap(
+          alignment: WrapAlignment.center,
+          children: children,
+        );
       },
     );
     if (event == null) return;
@@ -208,6 +230,31 @@ class _ChatPageState extends State<ChatPage> {
       case MessageEvent.delete:
         setState(() => Current.messages.removeRange(index, index + 2));
         await Current.save();
+        break;
+
+      case MessageEvent.source:
+        if (!context.mounted) return;
+        await showDialog(
+          context: context,
+          builder: (context) {
+            return Scaffold(
+              appBar: AppBar(
+                leading: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(false),
+                ),
+                title: Text(S.of(context).source),
+              ),
+              body: Padding(
+                padding: EdgeInsets.all(16),
+                child: SingleChildScrollView(
+                  child: SelectableText(message.text),
+                ),
+              ),
+            );
+          },
+        );
+
         break;
 
       default:
@@ -234,7 +281,7 @@ class _ChatPageState extends State<ChatPage> {
               final message = Current.messages[index];
               return MessageWidget(
                 message: message,
-                longPress: () async => await _longPress(context, index),
+                longPress: (context) async => await _longPress(context, index),
               );
             },
           ),
@@ -260,7 +307,7 @@ class _ChatPageState extends State<ChatPage> {
         ),
         Divider(),
         Container(
-          alignment: Alignment.topLeft,
+          alignment: Alignment.centerLeft,
           padding: const EdgeInsets.only(left: 16, top: 8, bottom: 8),
           child: Text(
             S.of(context).all_chats,
