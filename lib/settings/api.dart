@@ -18,8 +18,8 @@ import "../config.dart";
 import "../gen/l10n.dart";
 
 import "dart:convert";
+import "package:http/http.dart";
 import "package:flutter/material.dart";
-import "package:http/http.dart" as http;
 import "package:animate_do/animate_do.dart";
 import "package:flutter_riverpod/flutter_riverpod.dart";
 
@@ -90,12 +90,13 @@ class ApiSettings extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<ApiSettings> createState() => ApiSettingsState();
+  ConsumerState<ApiSettings> createState() => _ApiSettingsState();
 }
 
-class ApiSettingsState extends ConsumerState<ApiSettings> {
-  bool isFetching = false;
-  http.Client? fetchClient;
+class _ApiSettingsState extends ConsumerState<ApiSettings> {
+  String? _type;
+  Client? _client;
+  bool _isFetching = false;
   late final TextEditingController _nameCtrl;
   late final TextEditingController _modelsCtrl;
   late final TextEditingController _apiUrlCtrl;
@@ -107,8 +108,10 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
 
     final apiPair = widget.apiPair;
     final api = apiPair?.value;
+    final name = apiPair?.key;
 
-    _nameCtrl = TextEditingController(text: apiPair?.key);
+    _type = api?.type;
+    _nameCtrl = TextEditingController(text: name);
     _apiUrlCtrl = TextEditingController(text: api?.url);
     _apiKeyCtrl = TextEditingController(text: api?.key);
     _modelsCtrl = TextEditingController(text: api?.models.join(", "));
@@ -139,7 +142,30 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
             Row(
               children: [
                 Expanded(
-                  flex: 1,
+                  child: DropdownButtonFormField<String>(
+                    value: _type,
+                    items: <DropdownMenuItem<String>>[
+                      DropdownMenuItem(
+                        value: "openai",
+                        child: const Text("OpenAI"),
+                      ),
+                      DropdownMenuItem(
+                        value: "google",
+                        child: const Text("Google"),
+                      ),
+                    ],
+                    isExpanded: true,
+                    hint: Text(S.of(context).api_type),
+                    onChanged: (it) => setState(() => _type = it),
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
                   child: TextField(
                     controller: _nameCtrl,
                     decoration: InputDecoration(
@@ -150,20 +176,17 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    controller: _apiUrlCtrl,
-                    decoration: InputDecoration(
-                      labelText: S.of(context).api_url,
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
-                    ),
-                  ),
-                ),
               ],
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _apiUrlCtrl,
+              decoration: InputDecoration(
+                labelText: S.of(context).api_url,
+                border: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                ),
+              ),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -197,7 +220,7 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
                   children: [
                     Spin(
                       infinite: true,
-                      animate: isFetching,
+                      animate: _isFetching,
                       duration: Duration(seconds: 1),
                       child: IconButton.outlined(
                         icon: const Icon(Icons.sync),
@@ -262,16 +285,19 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
   }
 
   Future<void> _fetchModels() async {
-    if (isFetching) {
-      fetchClient?.close();
-      fetchClient = null;
-      isFetching = false;
+    if (_isFetching) {
+      _isFetching = false;
+      _client?.close();
+      _client = null;
       return;
     }
 
     final url = _apiUrlCtrl.text;
     final key = _apiKeyCtrl.text;
-    final modelsEndpoint = "$url/models";
+    final endPoint = switch (_type) {
+      "google" => "$url/models?key=$key",
+      _ => "$url/models",
+    };
 
     if (url.isEmpty || key.isEmpty) {
       Util.showSnackBar(
@@ -281,13 +307,16 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
       return;
     }
 
-    setState(() => isFetching = true);
+    setState(() => _isFetching = true);
 
     try {
-      fetchClient ??= http.Client();
-      final response = await fetchClient!.get(
-        Uri.parse(modelsEndpoint),
-        headers: {"Authorization": "Bearer $key"},
+      _client ??= Client();
+      final response = await _client!.get(
+        Uri.parse(endPoint),
+        headers: switch (_type) {
+          "google" => null,
+          _ => {"Authorization": "Bearer $key"},
+        },
       );
 
       if (response.statusCode != 200) {
@@ -295,16 +324,21 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
       }
 
       final json = jsonDecode(response.body);
-      final models = <String>[for (final cell in json["data"]) cell["id"]];
+      List<String> models = switch (_type) {
+        "google" => [
+            for (final cell in json["models"]) cell["name"].substring(7),
+          ],
+        _ => [for (final cell in json["data"]) cell["id"]],
+      };
 
       _modelsCtrl.text = models.join(", ");
     } catch (e) {
-      if (isFetching && mounted) {
+      if (_isFetching && mounted) {
         Dialogs.error(context: context, error: e);
       }
     }
 
-    setState(() => isFetching = false);
+    setState(() => _isFetching = false);
   }
 
   Future<void> _editModels() async {
@@ -408,11 +442,12 @@ class ApiSettingsState extends ConsumerState<ApiSettings> {
     }
 
     if (apiPair != null) Config.apis.remove(apiPair.key);
-    final modelList = models.split(",").map((e) => e.trim()).toList();
+    final modelList = models.split(',').map((e) => e.trim()).toList();
 
     Config.apis[name] = ApiConfig(
       url: apiUrl,
       key: apiKey,
+      type: _type,
       models: modelList,
     );
     Config.save();

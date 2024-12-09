@@ -100,6 +100,9 @@ class Config {
     }
   }
 
+  static bool get isOkToTts =>
+      tts.api != null && tts.model != null && tts.voice != null;
+
   static void _initDir() {
     final imagePath = "$_dir$_sep$_imageDir";
     final imageDir = Directory(imagePath);
@@ -207,23 +210,27 @@ class BotConfig {
 class ApiConfig {
   String url;
   String key;
+  String? type;
   List<String> models;
 
   ApiConfig({
     required this.url,
     required this.key,
     required this.models,
+    this.type,
   });
 
   Map toJson() => {
         "url": url,
         "key": key,
+        "type": type,
         "models": models,
       };
 
   factory ApiConfig.fromJson(Map json) => ApiConfig(
         url: json["url"],
         key: json["key"],
+        type: json["type"],
         models: json["models"].cast<String>(),
       );
 }

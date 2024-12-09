@@ -13,38 +13,16 @@
 // You should have received a copy of the GNU General Public License
 // along with ChatBot. If not, see <https://www.gnu.org/licenses/>.
 
-import "chat.dart";
 import "message.dart";
 import "../util.dart";
 import "../config.dart";
-import "../gen/l10n.dart";
 
 import "dart:io";
 import "dart:isolate";
 import "dart:convert";
 import "dart:typed_data";
-import "package:flutter/material.dart";
-import "package:flutter_riverpod/flutter_riverpod.dart";
 
-enum TtsStatus {
-  nothing,
-  loading,
-  playing;
-
-  bool get isNothing => this == TtsStatus.nothing;
-  bool get isLoading => this == TtsStatus.loading;
-  bool get isPlaying => this == TtsStatus.playing;
-}
-
-enum ChatStatus {
-  nothing,
-  responding;
-
-  bool get isNothing => this == ChatStatus.nothing;
-  bool get isResponding => this == ChatStatus.responding;
-}
-
-class CurrentChat {
+class Current {
   static File? file;
   static Uint8List? image;
   static ChatConfig? chat;
@@ -126,6 +104,7 @@ class CurrentChat {
 
   static String? get apiUrl => Config.apis[api]?.url;
   static String? get apiKey => Config.apis[api]?.key;
+  static String? get apiType => Config.apis[api]?.type;
   static BotConfig? get _bot => Config.bots[core.bot];
 
   static String? get title => chat?.title;
@@ -133,189 +112,24 @@ class CurrentChat {
   static int? get maxTokens => _bot?.maxTokens;
   static double? get temperature => _bot?.temperature;
   static String? get systemPrompts => _bot?.systemPrompts;
+
+  static bool get isOkToChat => api != null && model != null;
 }
 
-class CurrentChatSettings extends ConsumerStatefulWidget {
-  const CurrentChatSettings({super.key});
+enum TtsStatus {
+  nothing,
+  loading,
+  playing;
 
-  @override
-  ConsumerState<CurrentChatSettings> createState() =>
-      _CurrentChatSettingsState();
+  bool get isNothing => this == TtsStatus.nothing;
+  bool get isLoading => this == TtsStatus.loading;
+  bool get isPlaying => this == TtsStatus.playing;
 }
 
-class _CurrentChatSettingsState extends ConsumerState<CurrentChatSettings> {
-  String? _bot = CurrentChat.bot;
-  String? _api = CurrentChat.api;
-  String? _model = CurrentChat.model;
-  final TextEditingController _titleCtrl =
-      TextEditingController(text: CurrentChat.title);
+enum ChatStatus {
+  nothing,
+  responding;
 
-  @override
-  void dispose() {
-    _titleCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final botList = <DropdownMenuItem<String>>[];
-    final apiList = <DropdownMenuItem<String>>[];
-    final modelList = <DropdownMenuItem<String>>[];
-
-    final bots = Config.bots.keys;
-    final apis = Config.apis.keys;
-    final models = Config.apis[_api]?.models ?? [];
-
-    for (final bot in bots) {
-      botList.add(DropdownMenuItem(
-        value: bot,
-        child: Text(bot, overflow: TextOverflow.ellipsis),
-      ));
-    }
-
-    for (final api in apis) {
-      apiList.add(DropdownMenuItem(
-        value: api,
-        child: Text(api, overflow: TextOverflow.ellipsis),
-      ));
-    }
-
-    for (final model in models) {
-      modelList.add(DropdownMenuItem(
-        value: model,
-        child: Text(model, overflow: TextOverflow.ellipsis),
-      ));
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(S.of(context).chat_settings),
-      ),
-      body: Container(
-        padding: const EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 16),
-        child: ListView(
-          children: [
-            const SizedBox(height: 8),
-            TextField(
-              controller: _titleCtrl,
-              decoration: InputDecoration(
-                labelText: S.of(context).chat_title,
-                border: const OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _bot,
-                    items: botList,
-                    isExpanded: true,
-                    hint: Text(S.of(context).bot),
-                    onChanged: (it) => setState(() => _bot = it),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: _api,
-                    items: apiList,
-                    isExpanded: true,
-                    hint: Text(S.of(context).api),
-                    onChanged: (it) => setState(() {
-                      _model = null;
-                      _api = it;
-                    }),
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(8)),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            DropdownButtonFormField<String>(
-              value: _model,
-              items: modelList,
-              isExpanded: true,
-              menuMaxHeight: 480,
-              hint: Text(S.of(context).model),
-              onChanged: (it) => setState(() => _model = it),
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton.tonal(
-                    child: Text(S.of(context).reset),
-                    onPressed: () => setState(() {
-                      _model = null;
-                      _api = null;
-                      _bot = null;
-                    }),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: _save,
-                    child: Text(S.of(context).save),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _save() {
-    final title = _titleCtrl.text;
-    final oldModel = CurrentChat.model;
-    final oldTitle = CurrentChat.title;
-
-    if (title.isEmpty && CurrentChat.hasChat) {
-      Util.showSnackBar(
-        context: context,
-        content: Text(S.of(context).enter_a_title),
-      );
-      return;
-    }
-
-    if (CurrentChat.hasChat) {
-      CurrentChat.chat!.title = title;
-    } else if (title.isNotEmpty) {
-      CurrentChat.initChat(title);
-    }
-
-    CurrentChat.core = CoreConfig(
-      bot: _bot,
-      api: _api,
-      model: _model,
-    );
-    CurrentChat.save();
-
-    if (title != oldTitle && CurrentChat.hasFile) {
-      ref.read(chatsProvider.notifier).notify();
-    }
-    if (title != oldTitle || _model != oldModel) {
-      ref.read(chatProvider.notifier).notify();
-    }
-    if (mounted) Navigator.of(context).pop();
-  }
+  bool get isNothing => this == ChatStatus.nothing;
+  bool get isResponding => this == ChatStatus.responding;
 }
