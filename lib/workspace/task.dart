@@ -106,7 +106,7 @@ class _TaskTabState extends ConsumerState<TaskTab> {
               title: s.title_prompt,
               fields: [
                 InputDialogField(
-                  hint: s.please_input,
+                  label: s.please_input,
                   text: Config.title.prompt,
                   maxLines: null,
                 ),
@@ -132,28 +132,114 @@ class _TaskTabState extends ConsumerState<TaskTab> {
             style: TextStyle(color: primaryColor),
           ),
         ),
+        CheckboxListTile(
+          title: Text(s.search_vector),
+          contentPadding: const EdgeInsets.only(left: 24, right: 16),
+          value: Config.search.vector ?? false,
+          subtitle: Text(s.search_vector_hint),
+          onChanged: (value) {
+            setState(() => Config.search.vector = value);
+            Config.save();
+          },
+        ),
+        const Divider(height: 1),
         ListTile(
           title: Text(s.search_searxng),
           contentPadding: padding,
           subtitle: Text(s.search_searxng_hint),
           onTap: () async {
+            String? base;
+            String? extra;
+
+            final searxng = Config.search.searxng;
+            const fixedPart = "q={text}&format=json";
+
+            if (searxng != null) {
+              final uri = Uri.parse(searxng);
+              base = "${uri.scheme}://${uri.host}";
+              extra = uri.queryParameters.entries
+                  .map((it) => "${it.key}=${it.value}")
+                  .join('&');
+              extra = extra.replaceFirst(fixedPart, "");
+              if (extra.startsWith('&')) extra = extra.replaceFirst('&', "");
+            }
+
             final texts = await Dialogs.input(
               context: context,
               title: s.search_searxng,
               fields: [
                 InputDialogField(
-                  hint: s.please_input,
-                  text: Config.search.searxng,
+                  text: base,
+                  label: s.search_searxng_base,
+                  hint: "https://your.searxng.com",
+                ),
+                InputDialogField(
+                  text: extra,
+                  label: s.search_searxng_extra,
+                  help: s.search_searxng_extra_help,
                 ),
               ],
             );
             if (texts == null) return;
 
-            String? searxng;
-            final text = texts[0].trim();
-            if (text.isNotEmpty) searxng = text;
+            String? newBase;
+            String? newExtra;
+            final text1 = texts[0].trim();
+            final text2 = texts[1].trim();
+            if (text1.isNotEmpty) newBase = text1;
+            if (text2.isNotEmpty) newExtra = text2;
 
-            Config.search.searxng = searxng;
+            String? full;
+            if (newBase != null) {
+              full = "$newBase/search?$fixedPart";
+              if (newExtra != null) full += "&$newExtra";
+            }
+
+            Config.search.searxng = full;
+            Config.save();
+          },
+        ),
+        const Divider(height: 1),
+        ListTile(
+          title: Text(s.search_timeout),
+          contentPadding: padding,
+          subtitle: Text(s.search_timeout_hint),
+          onTap: () async {
+            final texts = await Dialogs.input(
+              context: context,
+              title: s.search_timeout,
+              fields: [
+                InputDialogField(
+                  hint: "3000",
+                  label: s.search_timeout_query,
+                  help: s.search_timeout_query_help,
+                  text: Config.search.queryTime?.toString(),
+                ),
+                InputDialogField(
+                  hint: "2000",
+                  label: s.search_timeout_fetch,
+                  help: s.search_timeout_fetch_help,
+                  text: Config.search.fetchTime?.toString(),
+                ),
+              ],
+            );
+            if (texts == null) return;
+
+            int? query;
+            int? fetch;
+            final text1 = texts[0].trim();
+            final text2 = texts[1].trim();
+            if (text1.isNotEmpty) {
+              query = int.tryParse(text1);
+              if (query == null) return;
+            }
+            if (text2.isNotEmpty) {
+              fetch = int.tryParse(text2);
+              if (fetch == null) return;
+            }
+
+            Config.search.queryTime = query;
+            Config.search.fetchTime = fetch;
             Config.save();
           },
         ),
@@ -168,7 +254,8 @@ class _TaskTabState extends ConsumerState<TaskTab> {
               title: s.search_n,
               fields: [
                 InputDialogField(
-                  hint: s.please_input,
+                  label: s.please_input,
+                  hint: "64",
                   text: Config.search.n?.toString(),
                 ),
               ],
@@ -197,7 +284,7 @@ class _TaskTabState extends ConsumerState<TaskTab> {
               title: s.search_prompt,
               fields: [
                 InputDialogField(
-                  hint: s.please_input,
+                  label: s.please_input,
                   text: Config.search.prompt,
                 ),
               ],

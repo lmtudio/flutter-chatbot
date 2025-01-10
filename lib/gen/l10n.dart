@@ -1060,10 +1060,10 @@ class S {
     );
   }
 
-  /// `Check for updates`
+  /// `Check for Updates`
   String get check_for_updates {
     return Intl.message(
-      'Check for updates',
+      'Check for Updates',
       name: 'check_for_updates',
       desc: '',
       args: [],
@@ -1270,6 +1270,266 @@ class S {
     );
   }
 
+  /// `Set up the embedding vector API and model first`
+  String get setup_vector_first {
+    return Intl.message(
+      'Set up the embedding vector API and model first',
+      name: 'setup_vector_first',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Embedding Vector`
+  String get search_vector {
+    return Intl.message(
+      'Embedding Vector',
+      name: 'search_vector',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Significantly reduces context size but increases response time`
+  String get search_vector_hint {
+    return Intl.message(
+      'Significantly reduces context size but increases response time',
+      name: 'search_vector_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Timeout`
+  String get search_timeout {
+    return Intl.message(
+      'Timeout',
+      name: 'search_timeout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Milliseconds for web page retrieval timeout`
+  String get search_timeout_hint {
+    return Intl.message(
+      'Milliseconds for web page retrieval timeout',
+      name: 'search_timeout_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Base URL`
+  String get search_searxng_base {
+    return Intl.message(
+      'Base URL',
+      name: 'search_searxng_base',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Additional Parameters`
+  String get search_searxng_extra {
+    return Intl.message(
+      'Additional Parameters',
+      name: 'search_searxng_extra',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `For example: engines=google&language=en`
+  String get search_searxng_extra_help {
+    return Intl.message(
+      'For example: engines=google&language=en',
+      name: 'search_searxng_extra_help',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Query Timeout`
+  String get search_timeout_query {
+    return Intl.message(
+      'Query Timeout',
+      name: 'search_timeout_query',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Timeout duration for SearXNG requests`
+  String get search_timeout_query_help {
+    return Intl.message(
+      'Timeout duration for SearXNG requests',
+      name: 'search_timeout_query_help',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fetch Timeout`
+  String get search_timeout_fetch {
+    return Intl.message(
+      'Fetch Timeout',
+      name: 'search_timeout_fetch',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Timeout duration for fetching web page content`
+  String get search_timeout_fetch_help {
+    return Intl.message(
+      'Timeout duration for fetching web page content',
+      name: 'search_timeout_fetch_help',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Embedding Vector`
+  String get embedding_vector {
+    return Intl.message(
+      'Embedding Vector',
+      name: 'embedding_vector',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Batch Size`
+  String get vector_batch_size {
+    return Intl.message(
+      'Batch Size',
+      name: 'vector_batch_size',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Maximum number of chunks that can be submitted in a single request`
+  String get vector_batch_size_hint {
+    return Intl.message(
+      'Maximum number of chunks that can be submitted in a single request',
+      name: 'vector_batch_size_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Vector Dimensions`
+  String get vector_dimensions {
+    return Intl.message(
+      'Vector Dimensions',
+      name: 'vector_dimensions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Output dimension of the embedding vector model`
+  String get vector_dimensions_hint {
+    return Intl.message(
+      'Output dimension of the embedding vector model',
+      name: 'vector_dimensions_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Batch size is limited by the API service provider. It's recommended to check and modify accordingly. Vector dimension is an advanced option and should only be filled if necessary.`
+  String get embedding_vector_info {
+    return Intl.message(
+      'Batch size is limited by the API service provider. It\'s recommended to check and modify accordingly. Vector dimension is an advanced option and should only be filled if necessary.',
+      name: 'embedding_vector_info',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Document Configuration`
+  String get document_config {
+    return Intl.message(
+      'Document Configuration',
+      name: 'document_config',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Number of Chunks`
+  String get chunk_n {
+    return Intl.message(
+      'Number of Chunks',
+      name: 'chunk_n',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Number of chunks to be integrated into the context`
+  String get chunk_n_hint {
+    return Intl.message(
+      'Number of chunks to be integrated into the context',
+      name: 'chunk_n_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chunk Size`
+  String get chunk_size {
+    return Intl.message(
+      'Chunk Size',
+      name: 'chunk_size',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Maximum number of characters a single chunk can contain`
+  String get chunk_size_hint {
+    return Intl.message(
+      'Maximum number of characters a single chunk can contain',
+      name: 'chunk_size_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chunk Overlap`
+  String get chunk_overlap {
+    return Intl.message(
+      'Chunk Overlap',
+      name: 'chunk_overlap',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Size of the overlapping portion with the previous chunk`
+  String get chunk_overlap_hint {
+    return Intl.message(
+      'Size of the overlapping portion with the previous chunk',
+      name: 'chunk_overlap_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Documents are divided into multiple chunks. After search and comparison, the most relevant chunks will be added to the context.`
+  String get document_config_hint {
+    return Intl.message(
+      'Documents are divided into multiple chunks. After search and comparison, the most relevant chunks will be added to the context.',
+      name: 'document_config_hint',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Set up the SearXNG first`
   String get setup_searxng_first {
     return Intl.message(
@@ -1320,30 +1580,30 @@ class S {
     );
   }
 
-  /// `SearXNG instance root URL (without trailing /)`
+  /// `SearXNG instance`
   String get search_searxng_hint {
     return Intl.message(
-      'SearXNG instance root URL (without trailing /)',
+      'SearXNG instance',
       name: 'search_searxng_hint',
       desc: '',
       args: [],
     );
   }
 
-  /// `Number of web pages`
+  /// `Number of Pages`
   String get search_n {
     return Intl.message(
-      'Number of web pages',
+      'Number of Pages',
       name: 'search_n',
       desc: '',
       args: [],
     );
   }
 
-  /// `Number of web pages to integrate into the context (default is 3)`
+  /// `Maximum number of web pages to retrieve`
   String get search_n_hint {
     return Intl.message(
-      'Number of web pages to integrate into the context (default is 3)',
+      'Maximum number of web pages to retrieve',
       name: 'search_n_hint',
       desc: '',
       args: [],

@@ -494,8 +494,8 @@ class ImageConfig {
 
   factory ImageConfig.fromJson(Map json) => ImageConfig(
         api: json["api"],
-        model: json["model"],
         size: json["size"],
+        model: json["model"],
         style: json["style"],
         quality: json["quality"],
       );
@@ -543,23 +543,25 @@ class TitleConfig {
   set model(String? value) => _model = value;
 
   Map toJson() => {
-        "enable": enable,
         "api": api,
         "model": model,
         "prompt": prompt,
+        "enable": enable,
       };
 
   factory TitleConfig.fromJson(Map json) => TitleConfig(
-        enable: json["enable"],
         api: json["api"],
         model: json["model"],
         prompt: json["prompt"],
+        enable: json["enable"],
       );
 }
 
 class SearchConfig {
   int? n;
   bool? vector;
+  int? queryTime;
+  int? fetchTime;
   String? prompt;
   String? searxng;
 
@@ -568,12 +570,16 @@ class SearchConfig {
     this.vector,
     this.prompt,
     this.searxng,
+    this.queryTime,
+    this.fetchTime,
   });
 
   Map toJson() => {
         "n": n,
         "vector": vector,
         "prompt": prompt,
+        "query": queryTime,
+        "fetch": fetchTime,
         "searxng": searxng,
       };
 
@@ -581,6 +587,8 @@ class SearchConfig {
         n: json["n"],
         vector: json["vector"],
         prompt: json["prompt"],
+        queryTime: json["query"],
+        fetchTime: json["fetch"],
         searxng: json["searxng"],
       );
 }
